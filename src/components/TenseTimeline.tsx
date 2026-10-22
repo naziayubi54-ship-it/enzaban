@@ -113,26 +113,43 @@ export const TenseTimeline: React.FC<TenseTimelineProps> = ({ activeTenseId, com
         <span className="text-[11px] text-slate-400">روی هر زمان بزن</span>
       </div>
 
-      {/* خط زمان اصلی: گذشته ← الان → آینده */}
-      <div dir="ltr" className="relative pt-2">
-        <div className="absolute left-3 right-3 top-[26px] h-1.5 rounded-full bg-gradient-to-r from-sky-400 via-indigo-500 to-purple-500" />
-        <div className="absolute left-1/2 top-[14px] -translate-x-1/2 flex flex-col items-center">
-          <span className="w-3 h-3 rounded-full bg-indigo-600 ring-4 ring-indigo-100 animate-pulse" />
+      {/* خط زمان اصلی: بولت «گذشته» اول خط، «حال» وسط، «آینده» آخر خط */}
+      <div dir="ltr" className="relative">
+        <div className="relative h-8">
+          <div className="absolute inset-x-1 top-1/2 -translate-y-1/2 h-1.5 rounded-full bg-gradient-to-r from-sky-400 via-indigo-500 to-purple-500" />
+          {zones.map((zone, i) => {
+            const zoneActive = active?.category === zone.id;
+            const pos = i === 0 ? 'left-0' : i === 1 ? 'left-1/2 -translate-x-1/2' : 'right-0';
+            return (
+              <span
+                key={zone.id}
+                className={`absolute top-1/2 -translate-y-1/2 ${pos} w-6 h-6 rounded-full border-[5px] border-white shadow-md ${zone.dot} transition-transform ${
+                  zoneActive ? 'scale-125 ring-4 ring-indigo-100' : ''
+                } ${zone.id === 'present' ? 'animate-pulse' : ''}`}
+              />
+            );
+          })}
         </div>
 
-        <div className="relative grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-3 gap-2 mt-1.5">
+          {zones.map((zone, i) => (
+            <div
+              key={zone.id}
+              dir="rtl"
+              className={i === 0 ? 'text-left' : i === 1 ? 'text-center' : 'text-right'}
+            >
+              <span className={`block text-xs font-black ${zone.text}`}>{zone.label}</span>
+              <span className="block text-[10px] text-slate-400">{zone.sub}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="relative grid grid-cols-3 gap-2 mt-3">
           {zones.map(zone => {
             const tenses = allTensesData.filter(t => t.category === zone.id);
             const zoneActive = active?.category === zone.id;
             return (
-              <div key={zone.id} className="flex flex-col items-center gap-2">
-                <div className="h-10 flex items-end">
-                  <span className={`w-4 h-4 rounded-full border-4 border-white shadow ${zone.dot} ${zoneActive ? 'scale-125' : ''} transition-transform`} />
-                </div>
-                <div dir="rtl" className="text-center -mt-1">
-                  <span className={`block text-xs font-black ${zone.text}`}>{zone.label}</span>
-                  <span className="block text-[10px] text-slate-400">{zone.sub}</span>
-                </div>
+              <div key={zone.id} className="flex flex-col items-center">
                 <div dir="rtl" className={`w-full flex flex-col gap-1.5 p-1.5 rounded-2xl ${zoneActive ? zone.soft : 'bg-slate-50'} transition-colors`}>
                   {tenses.map(t => {
                     const isActive = t.id === activeTenseId;

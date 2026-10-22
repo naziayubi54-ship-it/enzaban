@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { ChevronDown, Volume2, CheckCircle2, XCircle, ArrowLeft, Sprout } from 'lucide-react';
+import { ChevronDown, CheckCircle2, XCircle, ArrowLeft, Sprout } from 'lucide-react';
 import { basicsTopics, BasicTopic, BasicFormula } from '../../data/basicsData';
-import { playPronunciation } from '../../utils/speech';
 
 interface BasicsViewProps {
   completedBasics: string[];
@@ -19,17 +18,6 @@ const toneClass: Record<string, string> = {
 };
 
 const isLatin = (s: string) => /[A-Za-z]/.test(s);
-
-const SpeakBtn: React.FC<{ text: string }> = ({ text }) => (
-  <button
-    type="button"
-    onClick={() => playPronunciation(text)}
-    aria-label={`تلفظ: ${text}`}
-    className="w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-500 hover:text-indigo-600 flex items-center justify-center shrink-0"
-  >
-    <Volume2 className="w-4 h-4" />
-  </button>
-);
 
 const FormulaRow: React.FC<{ f: BasicFormula }> = ({ f }) => (
   <div className="bg-slate-50 rounded-2xl p-3 border border-slate-100">
@@ -49,7 +37,6 @@ const FormulaRow: React.FC<{ f: BasicFormula }> = ({ f }) => (
         <p dir="ltr" className="font-en text-sm font-bold text-indigo-700 text-left">{f.example.en}</p>
         <p className="text-[11px] text-slate-500">{f.example.fa}</p>
       </div>
-      <SpeakBtn text={f.example.en} />
     </div>
   </div>
 );
@@ -116,7 +103,6 @@ const TopicCard: React.FC<{
                   <p dir="ltr" className="font-en text-sm font-bold text-indigo-700 text-left">{ex.en}</p>
                   <p className="text-[11px] text-slate-500">{ex.fa}</p>
                 </div>
-                <SpeakBtn text={ex.en} />
               </div>
             ))}
           </div>

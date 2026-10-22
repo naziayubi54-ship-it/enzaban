@@ -1,4 +1,5 @@
 import React from 'react';
+import mascotImg from '../assets/mascot.png';
 
 interface MascotAvatarProps {
   type?: 'bear' | 'frog' | 'fire' | 'trophy';
@@ -75,33 +76,10 @@ export const MascotAvatar: React.FC<MascotAvatarProps> = ({
     );
   }
 
-  // Default Cute Bear Mascot (Lukman Bear from Screenshot 1)
+  // ماسکات اصلی برنامه (لوگوی لینگوپلاس)
   return (
     <div className={`relative flex items-center justify-center ${sizeMap[size]} ${className}`}>
-      <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
-        {/* Ears */}
-        <circle cx="28" cy="28" r="14" fill="#FB923C" stroke="#EA580C" strokeWidth="2" />
-        <circle cx="28" cy="28" r="8" fill="#FED7AA" />
-        <circle cx="72" cy="28" r="14" fill="#FB923C" stroke="#EA580C" strokeWidth="2" />
-        <circle cx="72" cy="28" r="8" fill="#FED7AA" />
-        {/* Head */}
-        <circle cx="50" cy="54" r="34" fill="#FB923C" stroke="#EA580C" strokeWidth="2.5" />
-        {/* Muzzle */}
-        <ellipse cx="50" cy="62" rx="18" ry="14" fill="#FED7AA" />
-        {/* Nose */}
-        <ellipse cx="50" cy="56" rx="5" ry="3.5" fill="#431407" />
-        {/* Mouth */}
-        <path d="M 50 59 L 50 64" stroke="#431407" strokeWidth="2" strokeLinecap="round" />
-        <path d="M 44 64 Q 50 69 56 64" stroke="#431407" strokeWidth="2" fill="none" strokeLinecap="round" />
-        {/* Eyes */}
-        <circle cx="38" cy="46" r="4.5" fill="#431407" />
-        <circle cx="62" cy="46" r="4.5" fill="#431407" />
-        <circle cx="36.5" cy="44.5" r="1.5" fill="#FFFFFF" />
-        <circle cx="60.5" cy="44.5" r="1.5" fill="#FFFFFF" />
-        {/* Rosy Cheeks */}
-        <circle cx="28" cy="58" r="5" fill="#F43F5E" opacity="0.3" />
-        <circle cx="72" cy="58" r="5" fill="#F43F5E" opacity="0.3" />
-      </svg>
+      <img src={mascotImg} alt="لینگوپلاس" draggable={false} className="w-full h-full object-contain drop-shadow-md select-none" />
     </div>
   );
 };

@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import { allVocabulary } from '../../data/vocabularyData';
 import { VocabularyWord, UserProgress } from '../../types';
-import { playPronunciation } from '../../utils/speech';
 import {
   Layers,
-  Volume2,
   Bookmark,
   BookmarkCheck,
   Search,
@@ -129,14 +127,6 @@ export const VocabularyView: React.FC<VocabularyViewProps> = ({
                   <div className="flex items-center gap-1">
                     <button
                       type="button"
-                      onClick={() => playPronunciation(item.word)}
-                      aria-label={`پخش تلفظ کلمه ${item.word}`}
-                      className="w-8 h-8 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 hover:text-indigo-600 flex items-center justify-center transition-colors active:scale-95"
-                    >
-                      <Volume2 className="w-4 h-4" />
-                    </button>
-                    <button
-                      type="button"
                       onClick={() => onToggleBookmarkWord(item.word)}
                       aria-label={`نشان کردن کلمه ${item.word}`}
                       className="w-8 h-8 rounded-xl bg-slate-50 border border-slate-200 text-slate-400 hover:text-amber-500 flex items-center justify-center transition-colors active:scale-95"
@@ -164,17 +154,6 @@ export const VocabularyView: React.FC<VocabularyViewProps> = ({
                 </div>
               </div>
 
-              <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
-                <span>دسته‌بندی: {item.category}</span>
-                <button
-                  type="button"
-                  onClick={() => playPronunciation(item.exampleEn)}
-                  className="text-indigo-600 hover:underline flex items-center gap-1 font-semibold"
-                >
-                  <Volume2 className="w-3 h-3" />
-                  <span>تلفظ مثال</span>
-                </button>
-              </div>
             </div>
           );
         })}

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Home, Compass, BookOpen, Layers, RotateCw, BarChart2,
-  Settings, Volume2, VolumeX, Flame, Sprout,
+  Settings, Code2, Volume2, VolumeX, Sprout, Moon, Sun, Type, Gauge, Target, Info, ArrowRight,
 } from 'lucide-react';
 import { MascotAvatar } from './MascotAvatar';
 import type { NavTab } from './BottomNav';
@@ -17,6 +17,52 @@ interface SideMenuProps {
   level: number;
   streakDays: number;
   mistakesCount: number;
+  theme: 'light' | 'dark';
+  onToggleTheme: () => void;
+  fontSize: 'sm' | 'md' | 'lg';
+  onChangeFontSize: (v: 'sm' | 'md' | 'lg') => void;
+  speechRate: 'slow' | 'normal';
+  onChangeSpeechRate: (v: 'slow' | 'normal') => void;
+  dailyGoal: number;
+  onChangeDailyGoal: (n: number) => void;
+  onReplayIntro: () => void;
+}
+
+// دکمه‌های انتخاب چندحالته (برای تنظیمات)
+function Segmented<T extends string | number>({
+  value, options, onChange,
+}: { value: T; options: { v: T; label: string }[]; onChange: (v: T) => void }) {
+  return (
+    <div className="flex bg-slate-100 rounded-xl p-1 gap-1">
+      {options.map(o => (
+        <button
+          key={String(o.v)}
+          type="button"
+          onClick={() => onChange(o.v)}
+          className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            value === o.v ? 'bg-white text-[#FF6A00] shadow-sm' : 'text-slate-500'
+          }`}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function Toggle({ on, onClick, label }: { on: boolean; onClick: () => void; label: string }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={on}
+      aria-label={label}
+      onClick={onClick}
+      className={`relative w-12 h-7 rounded-full transition-colors shrink-0 ${on ? 'bg-[#FF6A00]' : 'bg-slate-300'}`}
+    >
+      <span className={`absolute top-1 w-5 h-5 rounded-full bg-[#ffffff] shadow transition-all ${on ? 'right-1' : 'right-6'}`} />
+    </button>
+  );
 }
 
 const sections: { title: string; items: { id: NavTab; label: string; icon: React.ComponentType<{ className?: string }> }[] }[] = [
@@ -44,13 +90,17 @@ const PANEL_WIDTH = 320;
 // منوی کناری: از سمت راست وارد می‌شود و با کشیدن به سمت بیرون (راست) بسته می‌شود
 export const SideMenu: React.FC<SideMenuProps> = ({
   open, onClose, currentTab, onNavigate, soundEnabled, onToggleSound,
-  points, level, streakDays, mistakesCount,
+  points, level, mistakesCount,
+  theme, onToggleTheme, fontSize, onChangeFontSize, speechRate, onChangeSpeechRate,
+  dailyGoal, onChangeDailyGoal, onReplayIntro,
 }) => {
+  const [showSettings, setShowSettings] = useState(false);
+  const dark = theme === 'dark';
   const [dragX, setDragX] = useState(0);
   const [dragging, setDragging] = useState(false);
   const start = useRef<{ x: number; y: number; locked: 'h' | 'v' | null } | null>(null);
 
-  useEffect(() => { if (!open) setDragX(0); }, [open]);
+  useEffect(() => { if (!open) { setDragX(0); setShowSettings(false); } }, [open]);
 
   const onTouchStart = (e: React.TouchEvent) => {
     const t = e.touches[0];
@@ -84,7 +134,7 @@ export const SideMenu: React.FC<SideMenuProps> = ({
       {/* پس‌زمینه مات */}
       <div
         onClick={onClose}
-        className="absolute inset-0 bg-slate-900/30 backdrop-blur-[3px]"
+        className="absolute inset-0 bg-slate-950/50 backdrop-blur-[3px]"
         style={{ opacity: backdropOpacity, transition: dragging ? 'none' : 'opacity 300ms ease' }}
       />
 
@@ -124,24 +174,94 @@ export const SideMenu: React.FC<SideMenuProps> = ({
           <div className="flex flex-col gap-2">
             <button
               type="button"
-              onClick={() => { onNavigate('review'); onClose(); }}
-              aria-label="تنظیمات و آمار"
-              className="w-11 h-11 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-600 active:scale-95"
+              onClick={() => setShowSettings(v => !v)}
+              aria-label="تنظیمات"
+              aria-pressed={showSettings}
+              className={`w-11 h-11 rounded-2xl flex items-center justify-center active:scale-95 ${
+                showSettings ? 'bg-[#FF6A00] text-white' : 'bg-slate-50 text-slate-600'
+              }`}
             >
               <Settings className="w-5 h-5" />
             </button>
             <button
               type="button"
-              onClick={onToggleSound}
-              aria-label={soundEnabled ? 'خاموش کردن صدا' : 'روشن کردن صدا'}
+              onClick={onToggleTheme}
+              aria-label={dark ? 'تم روز' : 'تم شب'}
               className="w-11 h-11 rounded-2xl bg-slate-50 flex items-center justify-center active:scale-95"
             >
-              {soundEnabled ? <Volume2 className="w-5 h-5 text-amber-500" /> : <VolumeX className="w-5 h-5 text-slate-400" />}
+              {dark ? <Sun className="w-5 h-5 text-amber-400" /> : <Moon className="w-5 h-5 text-indigo-500" />}
             </button>
           </div>
         </div>
 
         {/* آیتم‌ها */}
+        {showSettings ? (
+          <div className="flex-1 overflow-y-auto px-4 py-3 no-scrollbar flex flex-col gap-3">
+            <button
+              type="button"
+              onClick={() => setShowSettings(false)}
+              className="self-start flex items-center gap-1.5 text-xs font-bold text-slate-500 px-2 py-1"
+            >
+              <ArrowRight className="w-4 h-4" />
+              <span>بازگشت به منو</span>
+            </button>
+            <p className="text-sm font-black text-slate-800 px-1">تنظیمات</p>
+
+            <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50">
+              {dark ? <Moon className="w-5 h-5 text-indigo-400" /> : <Sun className="w-5 h-5 text-amber-500" />}
+              <span className="flex-1 text-sm font-bold text-slate-700">تم شب</span>
+              <Toggle on={dark} onClick={onToggleTheme} label="تم شب" />
+            </div>
+
+            <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50">
+              {soundEnabled ? <Volume2 className="w-5 h-5 text-amber-500" /> : <VolumeX className="w-5 h-5 text-slate-400" />}
+              <span className="flex-1 text-sm font-bold text-slate-700">تلفظ خودکار پاسخ‌ها</span>
+              <Toggle on={soundEnabled} onClick={onToggleSound} label="صدا" />
+            </div>
+
+            <div className="p-3 rounded-2xl bg-slate-50 flex flex-col gap-2.5">
+              <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
+                <Gauge className="w-5 h-5 text-slate-400" /><span>سرعت تلفظ</span>
+              </div>
+              <Segmented value={speechRate} onChange={onChangeSpeechRate}
+                options={[{ v: 'slow', label: 'آهسته' }, { v: 'normal', label: 'معمولی' }]} />
+            </div>
+
+            <div className="p-3 rounded-2xl bg-slate-50 flex flex-col gap-2.5">
+              <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
+                <Type className="w-5 h-5 text-slate-400" /><span>اندازه‌ی متن</span>
+              </div>
+              <Segmented value={fontSize} onChange={onChangeFontSize}
+                options={[{ v: 'sm', label: 'کوچک' }, { v: 'md', label: 'معمولی' }, { v: 'lg', label: 'بزرگ' }]} />
+            </div>
+
+            <div className="p-3 rounded-2xl bg-slate-50 flex flex-col gap-2.5">
+              <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
+                <Target className="w-5 h-5 text-slate-400" /><span>هدف روزانه (تعداد تمرین)</span>
+              </div>
+              <Segmented value={dailyGoal} onChange={onChangeDailyGoal}
+                options={[3, 5, 10, 15].map(n => ({ v: n, label: n.toLocaleString('fa-IR') }))} />
+            </div>
+
+            <button
+              type="button"
+              onClick={onReplayIntro}
+              className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 text-right active:scale-[0.98]"
+            >
+              <Info className="w-5 h-5 text-slate-400" />
+              <span className="flex-1 text-sm font-bold text-slate-700">دوباره دیدن معرفی برنامه</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => { onNavigate('review'); onClose(); }}
+              className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 text-right active:scale-[0.98]"
+            >
+              <BarChart2 className="w-5 h-5 text-slate-400" />
+              <span className="flex-1 text-sm font-bold text-slate-700">آمار و بازنشانی پیشرفت</span>
+            </button>
+          </div>
+        ) : (
         <nav className="flex-1 overflow-y-auto px-4 py-3 no-scrollbar">
           {sections.map(sec => (
             <div key={sec.title} className="mb-3">
@@ -175,11 +295,12 @@ export const SideMenu: React.FC<SideMenuProps> = ({
             </div>
           ))}
         </nav>
+        )}
 
         {/* پایین منو */}
         <div className="border-t border-slate-100 p-4 flex items-center justify-center gap-2 text-xs text-slate-500">
-          <Flame className="w-4 h-4 text-amber-500" />
-          <span>{streakDays.toLocaleString('fa-IR')} روز پشت‌سرهم تمرین</span>
+          <Code2 className="w-4 h-4 text-indigo-500" />
+          <span>برنامه‌نویس: محمدرضا ارجمند</span>
         </div>
       </aside>
     </div>

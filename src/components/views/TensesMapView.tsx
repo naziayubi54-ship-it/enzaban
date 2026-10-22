@@ -10,7 +10,7 @@ import {
   CheckCircle2,
   XCircle,
   HelpCircle,
-  Volume2,
+  ChevronDown,
   Layers,
   ArrowLeft,
   BookOpen,
@@ -19,7 +19,7 @@ import {
 import confetti from 'canvas-confetti';
 import { TenseTimeline } from '../TenseTimeline';
 import { TenseIcon } from '../tenseIcons';
-import { tenseUsages } from '../../data/tenseUsagesData';
+import { tenseUsages, simpleFormulas } from '../../data/tenseUsagesData';
 
 interface TensesMapViewProps {
   completedTenses?: string[];
@@ -36,6 +36,7 @@ export const TensesMapView: React.FC<TensesMapViewProps> = ({
 }) => {
   const [activeTenseId, setActiveTenseId] = useState<string>('present-simple');
   const [showPatterns, setShowPatterns] = useState<boolean>(false);
+  const [usagesOpenFor, setUsagesOpenFor] = useState<string | null>(null);
 
   // Quiz state
   const [quizMode, setQuizMode] = useState<'none' | 'formula' | 'sentence'>('none');
@@ -49,6 +50,8 @@ export const TensesMapView: React.FC<TensesMapViewProps> = ({
   const filteredTenses = allTensesData.filter(t => t.category === selectedCategory);
   const usages = tenseUsages[activeTense.id] || [];
   const isLearned = completedTenses.includes(activeTense.id);
+  const usagesOpen = usagesOpenFor === activeTense.id;
+  const simpleFormula = simpleFormulas[activeTense.id];
 
   // آیکون مرتبط با مفهوم هر زمان (رنگ‌ها همان رنگ‌های قبلی)
   const renderCardIcon = (tenseId: string, badgeColor: string) => (
@@ -386,38 +389,61 @@ export const TensesMapView: React.FC<TensesMapViewProps> = ({
             {activeTense.description}
           </div>
 
-          {/* کاربردها به زبان ساده */}
+                    {/* ۱) فرمول ساده ساخت جمله */}
+          {simpleFormula && (
+            <div className="rounded-2xl p-[1.5px] bg-gradient-to-br from-indigo-400 via-sky-400 to-emerald-400 shadow-sm">
+              <div className="bg-white rounded-[14px] px-3 py-3 flex flex-col items-center gap-1.5">
+                <span className="text-[11px] font-bold text-indigo-600 flex items-center gap-1">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                  فرمول ساخت جمله
+                </span>
+                <p
+                  dir="ltr"
+                  className="font-en text-[13px] sm:text-base font-black text-slate-800 text-center leading-relaxed break-words max-w-full"
+                >
+                  {simpleFormula}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* ۲) کجا به کار می‌رود؟ (آکاردئونی) */}
           {usages.length > 0 && (
-            <div className="flex flex-col gap-2">
-              <span className="text-sm font-black text-slate-800 flex items-center gap-1.5">
-                <Lightbulb className="w-4 h-4 text-amber-500" />
-                {activeTense.nameFa.split(' (')[0]} کجاها به کار می‌رود؟
-              </span>
-              {usages.map((u, idx) => (
-                <div key={idx} className="bg-white border border-slate-100 rounded-2xl p-3 flex gap-3 shadow-2xs">
-                  <span className="w-6 h-6 shrink-0 rounded-full bg-amber-100 text-amber-700 text-xs font-black flex items-center justify-center">
-                    {(idx + 1).toLocaleString('fa-IR')}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs sm:text-sm font-bold text-slate-800 leading-relaxed">{u.whenFa}</p>
-                    <div className="mt-1.5 bg-slate-50 rounded-xl p-2 flex items-center gap-2">
+            <div className="rounded-2xl border border-amber-200 bg-amber-50/40 overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setUsagesOpenFor(usagesOpen ? null : activeTense.id)}
+                aria-expanded={usagesOpen}
+                className="w-full flex items-center justify-between gap-2 px-3.5 py-3 text-right"
+              >
+                <span className="text-sm font-black text-slate-800 flex items-center gap-1.5">
+                  <Lightbulb className="w-4 h-4 text-amber-500" />
+                  {activeTense.nameFa.split(' (')[0]} کجاها به کار می‌رود؟
+                </span>
+                <ChevronDown
+                  className={`w-4 h-4 text-slate-500 shrink-0 transition-transform duration-300 ${usagesOpen ? 'rotate-180' : ''}`}
+                />
+              </button>
+
+              {usagesOpen && (
+                <div className="flex flex-col gap-2 px-3 pb-3 animate-fade-in">
+                  {usages.map((u, idx) => (
+                    <div key={idx} className="bg-white border border-slate-100 rounded-2xl p-3 flex gap-3 shadow-2xs">
+                      <span className="w-6 h-6 shrink-0 rounded-full bg-amber-100 text-amber-700 text-xs font-black flex items-center justify-center">
+                        {(idx + 1).toLocaleString('fa-IR')}
+                      </span>
                       <div className="flex-1 min-w-0">
-                        <span className="text-[10px] text-slate-400 block">مثال:</span>
-                        <p dir="ltr" className="font-en text-sm font-bold text-indigo-700 text-left">{u.en}</p>
-                        <p className="text-[11px] text-slate-600 mt-0.5">{u.fa}</p>
+                        <p className="text-xs sm:text-sm font-bold text-slate-800 leading-relaxed">{u.whenFa}</p>
+                        <div className="mt-1.5 bg-slate-50 rounded-xl p-2">
+                          <span className="text-[10px] text-slate-400 block">مثال:</span>
+                          <p dir="ltr" className="font-en text-sm font-bold text-indigo-700 text-left">{u.en}</p>
+                          <p className="text-[11px] text-slate-600 mt-0.5">{u.fa}</p>
+                        </div>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => playPronunciation(u.en)}
-                        aria-label={`تلفظ: ${u.en}`}
-                        className="w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-600 hover:text-indigo-600 flex items-center justify-center shrink-0"
-                      >
-                        <Volume2 className="w-4 h-4" />
-                      </button>
                     </div>
-                  </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
           )}
 
@@ -471,20 +497,12 @@ export const TensesMapView: React.FC<TensesMapViewProps> = ({
                   key={idx}
                   className="bg-slate-50 p-3 rounded-2xl border border-slate-100 flex items-center justify-between gap-3"
                 >
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <p dir="ltr" className="font-en text-sm font-bold text-indigo-700 text-left">
                       {ex.en}
                     </p>
                     <p className="text-xs text-slate-600 mt-0.5">{ex.fa}</p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => playPronunciation(ex.en)}
-                    aria-label={`تلفظ: ${ex.en}`}
-                    className="w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-600 hover:text-indigo-600 flex items-center justify-center shrink-0 transition-colors shadow-2xs"
-                  >
-                    <Volume2 className="w-4 h-4" />
-                  </button>
                 </div>
               ))}
             </div>

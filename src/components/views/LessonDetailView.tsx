@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { Lesson, UserProgress } from '../../types';
-import { playPronunciation } from '../../utils/speech';
 import { ExerciseModal } from '../ExerciseModal';
 import { FormulaVisualizer } from '../FormulaVisualizer';
 import { AuxChip } from '../../utils/auxiliaryColors';
 import {
   ArrowRight,
   BookOpen,
-  Volume2,
   AlertTriangle,
   CheckCircle2,
   Sparkles,
@@ -266,15 +264,6 @@ export const LessonDetailView: React.FC<LessonDetailViewProps> = ({
                   </p>
                 )}
               </div>
-
-              <button
-                type="button"
-                onClick={() => playPronunciation(ex.en)}
-                aria-label={`پخش تلفظ جمله: ${ex.en}`}
-                className="w-9 h-9 rounded-2xl bg-white border border-slate-200 text-slate-600 hover:text-indigo-600 hover:border-indigo-300 flex items-center justify-center shrink-0 transition-colors shadow-2xs active:scale-95"
-              >
-                <Volume2 className="w-4 h-4" />
-              </button>
             </div>
           ))}
         </div>
@@ -313,14 +302,6 @@ export const LessonDetailView: React.FC<LessonDetailViewProps> = ({
                 </div>
 
                 <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={() => playPronunciation(w.word)}
-                    aria-label={`پخش تلفظ کلمه ${w.word}`}
-                    className="w-7 h-7 rounded-xl bg-white border border-slate-200 text-slate-600 hover:text-indigo-600 flex items-center justify-center transition-colors"
-                  >
-                    <Volume2 className="w-3.5 h-3.5" />
-                  </button>
                   <button
                     type="button"
                     onClick={() => onToggleBookmarkWord(w.word)}
@@ -410,15 +391,17 @@ export const LessonDetailView: React.FC<LessonDetailViewProps> = ({
       </div>
 
       {/* Interactive Exercises Modal */}
-      <ExerciseModal
-        title={lesson.titleFa}
-        exercises={lesson.exercises}
-        isOpen={isExerciseOpen}
-        onClose={() => setIsExerciseOpen(false)}
-        onCompleteExercise={handleExerciseComplete}
-        onRecordMistake={onRecordMistake}
-        soundEnabled={soundEnabled}
-      />
+      {isExerciseOpen && (
+        <ExerciseModal
+          title={lesson.titleFa}
+          exercises={lesson.exercises}
+          isOpen={isExerciseOpen}
+          onClose={() => setIsExerciseOpen(false)}
+          onCompleteExercise={handleExerciseComplete}
+          onRecordMistake={onRecordMistake}
+          soundEnabled={soundEnabled}
+        />
+      )}
     </div>
   );
 };

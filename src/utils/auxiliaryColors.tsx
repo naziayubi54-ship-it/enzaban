@@ -59,7 +59,8 @@ export const AuxChip: React.FC<{
   verb: string;
   showTenseLabel?: boolean;
   className?: string;
-}> = ({ verb, showTenseLabel = false, className = '' }) => {
+  compact?: boolean;
+}> = ({ verb, showTenseLabel = false, className = '', compact = false }) => {
   const cleanVerb = verb.trim().toLowerCase();
   const config = auxColorMap[cleanVerb] || {
     bg: 'bg-slate-100',
@@ -76,7 +77,7 @@ export const AuxChip: React.FC<{
   return (
     <span
       dir="ltr"
-      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-xl border text-xs font-en font-bold shadow-2xs ${config.bg} ${config.text} ${config.border} ${className}`}
+      className={`inline-flex items-center justify-center max-w-full break-words text-center ${compact ? 'gap-1 px-1 py-0.5 rounded-lg text-[11px] leading-tight' : 'gap-1.5 px-2.5 py-0.5 rounded-xl text-xs'} border font-en font-bold shadow-2xs ${config.bg} ${config.text} ${config.border} ${className}`}
     >
       <span>{verb}</span>
       {showTenseLabel && (

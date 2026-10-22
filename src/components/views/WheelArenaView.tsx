@@ -10,7 +10,6 @@ import {
   Sparkles,
   CheckCircle2,
   XCircle,
-  Volume2,
   ArrowLeft,
   ArrowRight,
   Flame,
@@ -194,23 +193,8 @@ export const WheelArenaView: React.FC<WheelArenaViewProps> = ({
         </div>
       </div>
 
-      {/* Mode Switch: چندبخشی (فاعل/کمکی/فعل/قید) vs تک‌موضوعی */}
+      {/* Mode Switch: راست = تمرین تک بخش، چپ = جمله چند بخشی */}
       <div className="bg-slate-100 p-1 rounded-2xl flex items-center gap-1">
-        <button
-          type="button"
-          onClick={() => {
-            setArenaMode('multi-slot');
-            setHasChecked(false);
-            setIsCorrect(false);
-          }}
-          className={`flex-1 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
-            arenaMode === 'multi-slot'
-              ? 'bg-white text-indigo-700 shadow-xs'
-              : 'text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          🎯 ساخت جمله چندبخشی (پیشرفته)
-        </button>
         <button
           type="button"
           onClick={() => {
@@ -224,7 +208,22 @@ export const WheelArenaView: React.FC<WheelArenaViewProps> = ({
               : 'text-slate-500 hover:text-slate-800'
           }`}
         >
-          🔘 تمرین‌های تک‌چرخ
+          🔘 تمرین تک بخش
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setArenaMode('multi-slot');
+            setHasChecked(false);
+            setIsCorrect(false);
+          }}
+          className={`flex-1 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+            arenaMode === 'multi-slot'
+              ? 'bg-white text-indigo-700 shadow-xs'
+              : 'text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          🎯 جمله چند بخشی
         </button>
       </div>
 
@@ -356,21 +355,6 @@ export const WheelArenaView: React.FC<WheelArenaViewProps> = ({
                           <span className="font-bold text-xs sm:text-sm">
                             {isCorrect ? 'جمله کاملاً درست و هماهنگ است! 🎉' : 'نیاز به هماهنگی اجزا'}
                           </span>
-                          {isCorrect && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const sentence = currentChallenge.slots
-                                  .map((s, i) => s.options[slotSelections[i] || 0])
-                                  .join(' ');
-                                playPronunciation(sentence);
-                              }}
-                              className="text-xs flex items-center gap-1 underline opacity-80 hover:opacity-100"
-                            >
-                              <Volume2 className="w-3.5 h-3.5" />
-                              <span>تلفظ صوتی</span>
-                            </button>
-                          )}
                         </div>
                         <p className="text-xs mt-1 leading-relaxed">{feedbackText}</p>
                         {sentenceTranslation && (
@@ -507,22 +491,6 @@ export const WheelArenaView: React.FC<WheelArenaViewProps> = ({
                           <span className="font-bold text-xs sm:text-sm">
                             {isCorrect ? 'پاسخ کاملاً صحیح است! 🎉' : 'نادرست — نگران نباش!'}
                           </span>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const sentence =
-                                (currentSingleEx.prefixText || '') +
-                                ' ' +
-                                currentSingleEx.correctOption +
-                                ' ' +
-                                (currentSingleEx.suffixText || '');
-                              playPronunciation(sentence.trim());
-                            }}
-                            className="text-xs flex items-center gap-1 underline opacity-80 hover:opacity-100"
-                          >
-                            <Volume2 className="w-3.5 h-3.5" />
-                            <span>تلفظ صوتی</span>
-                          </button>
                         </div>
                         <p className="text-xs mt-1 leading-relaxed">{feedbackText}</p>
                       </div>

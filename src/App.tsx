@@ -13,9 +13,27 @@ import { WheelArenaView } from './components/views/WheelArenaView';
 import { VocabularyView } from './components/views/VocabularyView';
 import { ReviewMistakesView } from './components/views/ReviewMistakesView';
 import { BasicsView } from './components/views/BasicsView';
-import { setupNative } from './utils/native';
+import { setupNative, setStatusBarTheme } from './utils/native';
+import { SPEECH_RATE_KEY } from './utils/speech';
+import { SplashScreen } from './components/SplashScreen';
+import { Onboarding } from './components/Onboarding';
 
 const SOUND_KEY = 'lingoplus_sound_v1';
+const ONBOARD_KEY = 'lingoplus_onboarded_v1';
+const THEME_KEY = 'lingoplus_theme_v1';
+const FONT_KEY = 'lingoplus_font_v1';
+
+export type ThemeMode = 'light' | 'dark';
+export type FontSize = 'sm' | 'md' | 'lg';
+export type SpeechRate = 'slow' | 'normal';
+const FONT_PX: Record<FontSize, string> = { sm: '14px', md: '16px', lg: '18px' };
+
+const readKey = (k: string): string | null => { try { return localStorage.getItem(k); } catch { return null; } };
+const writeKey = (k: string, v: string) => { try { localStorage.setItem(k, v); } catch { /* ignore */ } };
+
+const hasSeenOnboarding = (): boolean => {
+  try { return localStorage.getItem(ONBOARD_KEY) === 'yes'; } catch { return false; }
+};
 
 export default function App() {
   const [progress, setProgress] = useState<UserProgress>(loadUserProgress);
@@ -23,8 +41,34 @@ export default function App() {
   const [selectedLessonId, setSelectedLessonId] = useState<number | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState<boolean>(() => localStorage.getItem(SOUND_KEY) !== 'off');
+  // اسپلش ← (فقط بار اول) دو اسلاید معرفی ← برنامه
+  const [theme, setTheme] = useState<ThemeMode>(() => (readKey(THEME_KEY) === 'dark' ? 'dark' : 'light'));
+  const [fontSize, setFontSize] = useState<FontSize>(() => {
+    const v = readKey(FONT_KEY);
+    return v === 'sm' || v === 'lg' ? v : 'md';
+  });
+  const [speechRate, setSpeechRate] = useState<SpeechRate>(() => (readKey(SPEECH_RATE_KEY) === 'slow' ? 'slow' : 'normal'));
+  const [stage, setStage] = useState<'splash' | 'onboarding' | 'app'>('splash');
+
+  const handleSplashDone = () => setStage(hasSeenOnboarding() ? 'app' : 'onboarding');
+  const handleOnboardingFinish = () => {
+    try { localStorage.setItem(ONBOARD_KEY, 'yes'); } catch { /* ignore */ }
+    setStage('app');
+  };
 
   useEffect(() => { saveUserProgress(progress); }, [progress]);
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    document.documentElement.style.colorScheme = theme;
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#0F1426' : '#FEF9F0');
+    writeKey(THEME_KEY, theme);
+    setStatusBarTheme(theme === 'dark');
+  }, [theme]);
+  useEffect(() => {
+    document.documentElement.style.fontSize = FONT_PX[fontSize];
+    writeKey(FONT_KEY, fontSize);
+  }, [fontSize]);
+  useEffect(() => { writeKey(SPEECH_RATE_KEY, speechRate); }, [speechRate]);
   useEffect(() => { localStorage.setItem(SOUND_KEY, soundEnabled ? 'on' : 'off'); }, [soundEnabled]);
 
   // برگشت به بالای صفحه با تغییر تب یا درس
@@ -106,6 +150,8 @@ export default function App() {
     }));
   };
 
+  const handleSetDailyGoal = (n: number) => setProgress(prev => ({ ...prev, dailyGoal: n }));
+
   const handleClearMistakes = () => setProgress(prev => ({ ...prev, mistakes: [] }));
   const handleRemoveMistake = (id: string) =>
     setProgress(prev => ({ ...prev, mistakes: prev.mistakes.filter(m => m.id !== id) }));
@@ -146,6 +192,15 @@ export default function App() {
         level={level}
         streakDays={progress.streakDays}
         mistakesCount={progress.mistakes.length}
+        theme={theme}
+        onToggleTheme={() => setTheme(t => (t === 'dark' ? 'light' : 'dark'))}
+        fontSize={fontSize}
+        onChangeFontSize={setFontSize}
+        speechRate={speechRate}
+        onChangeSpeechRate={setSpeechRate}
+        dailyGoal={progress.dailyGoal}
+        onChangeDailyGoal={handleSetDailyGoal}
+        onReplayIntro={() => { setMenuOpen(false); setStage('onboarding'); }}
       />
 
       <main className="flex-1 w-full pt-1 pb-6">
@@ -191,6 +246,7 @@ export default function App() {
             {currentTab === 'review' && (
               <ReviewMistakesView
                 progress={progress}
+                onNavigateTab={goTab}
                 onClearMistakes={handleClearMistakes}
                 onRemoveMistake={handleRemoveMistake}
                 onResetProgress={handleResetProgress}
@@ -202,6 +258,9 @@ export default function App() {
       </main>
 
       <BottomNav currentTab={activeTab} onTabChange={goTab} mistakesCount={progress.mistakes.length} />
+
+      {stage === 'onboarding' && <Onboarding onFinish={handleOnboardingFinish} />}
+      {stage === 'splash' && <SplashScreen onDone={handleSplashDone} />}
     </div>
   );
 }

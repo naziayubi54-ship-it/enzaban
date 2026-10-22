@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { LessonExercise, WheelExerciseItem, WordOrderExerciseItem, MultipleChoiceExerciseItem, FillBlankExerciseItem } from '../types';
 import { WheelSelector } from './WheelSelector';
 import { playPronunciation } from '../utils/speech';
 import { validateWheelAnswer, validateWordOrder } from '../utils/grammarRules';
-import { CheckCircle2, XCircle, Volume2, RotateCcw, ArrowRight, ArrowLeft, Sparkles, HelpCircle } from 'lucide-react';
+import { CheckCircle2, XCircle, RotateCcw, ArrowRight, ArrowLeft, Sparkles, HelpCircle } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 interface ExerciseModalProps {
@@ -38,6 +38,33 @@ export const ExerciseModal: React.FC<ExerciseModalProps> = ({
   const [isFinished, setIsFinished] = useState<boolean>(false);
 
   const currentExercise = exercises[currentIndex];
+  const feedbackRef = useRef<HTMLDivElement>(null);
+
+  // هر بار که مودال باز می‌شود از اول شروع شود (قبلاً صفحه‌ی «پایان» یا امتیاز قبلی می‌ماند)
+  useEffect(() => {
+    if (!isOpen) return;
+    setCurrentIndex(0);
+    setScore(0);
+    setIsFinished(false);
+  }, [isOpen]);
+
+  // قفل اسکرول صفحه‌ی پشت مودال تا صفحه با لمس تمرین جابه‌جا نشود
+  useEffect(() => {
+    if (!isOpen) return;
+    const prevBody = document.body.style.overflow;
+    const prevHtml = document.documentElement.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prevBody;
+      document.documentElement.style.overflow = prevHtml;
+    };
+  }, [isOpen]);
+
+  // بعد از «بررسی پاسخ»، بازخورد در دید بیاید (بدون اینکه اندازه‌ی مودال تغییر کند)
+  useEffect(() => {
+    if (hasChecked) feedbackRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }, [hasChecked]);
 
   // Initialize state when current exercise changes
   useEffect(() => {
@@ -145,10 +172,14 @@ export const ExerciseModal: React.FC<ExerciseModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs">
-      <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-slate-100 flex flex-col max-h-[92vh] overflow-hidden animate-scale-up">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs"
+      style={{ overscrollBehavior: 'contain' }}
+    >
+      {/* ارتفاع ثابت: اندازه‌ی مودال بین انواع تمرین و بعد از بازخورد تغییر نمی‌کند */}
+      <div className="exercise-sheet bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-slate-100 flex flex-col overflow-hidden animate-scale-up">
         {/* Top bar with progress and title */}
-        <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between">
+        <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between shrink-0">
           <div>
             <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">
               تمرین تعاملی
@@ -170,7 +201,7 @@ export const ExerciseModal: React.FC<ExerciseModalProps> = ({
         </div>
 
         {/* Progress line */}
-        <div className="w-full bg-slate-100 h-1.5">
+        <div className="w-full bg-slate-100 h-1.5 shrink-0">
           <div
             className="bg-indigo-600 h-1.5 transition-all duration-300"
             style={{ width: `${((currentIndex + 1) / exercises.length) * 100}%` }}
@@ -178,7 +209,10 @@ export const ExerciseModal: React.FC<ExerciseModalProps> = ({
         </div>
 
         {/* Main Content Area */}
-        <div className="p-4 sm:p-6 overflow-y-auto flex-1 flex flex-col">
+        <div
+          className="p-4 sm:p-6 overflow-y-auto flex-1 min-h-0 flex flex-col"
+          style={{ touchAction: 'pan-y', overscrollBehavior: 'contain' }}
+        >
           {!isFinished ? (
             <>
               {/* Prompt */}
@@ -200,10 +234,10 @@ export const ExerciseModal: React.FC<ExerciseModalProps> = ({
                   {/* Dynamic Sentence Preview updating live with wheel selection */}
                   <div
                     dir="ltr"
-                    className="w-full text-center p-3.5 bg-slate-50 border border-slate-200 rounded-2xl mb-4 font-en text-lg sm:text-xl font-bold text-slate-800"
+                    className="w-full text-center p-3.5 min-h-[76px] flex flex-wrap items-center justify-center gap-y-1 bg-slate-50 border border-slate-200 rounded-2xl mb-4 font-en text-lg sm:text-xl font-bold text-slate-800"
                   >
                     <span>{(currentExercise as WheelExerciseItem).prefixText}</span>
-                    <span className="inline-block mx-1.5 px-3 py-0.5 bg-indigo-600 text-white rounded-xl shadow-xs transition-transform transform scale-105">
+                    <span className="inline-block mx-1.5 px-3 py-0.5 bg-indigo-600 text-white rounded-xl shadow-xs">
                       {(currentExercise as WheelExerciseItem).options[selectedWheelIndex]}
                     </span>
                     <span>{(currentExercise as WheelExerciseItem).suffixText}</span>
@@ -300,7 +334,7 @@ export const ExerciseModal: React.FC<ExerciseModalProps> = ({
                         onClick={() => !hasChecked && setSelectedChoice(idx)}
                         disabled={hasChecked}
                         dir="ltr"
-                        className={`p-3.5 rounded-2xl text-left font-en text-sm font-semibold border transition-all ${
+                        className={`p-3.5 rounded-2xl text-left font-en text-sm font-semibold border transition-colors select-none touch-manipulation ${
                           selectedChoice === idx
                             ? 'bg-indigo-600 text-white border-indigo-600 shadow-md'
                             : 'bg-white text-slate-700 border-slate-200 hover:border-indigo-300 hover:bg-slate-50'
@@ -334,7 +368,7 @@ export const ExerciseModal: React.FC<ExerciseModalProps> = ({
                         onClick={() => !hasChecked && setSelectedBlank(opt)}
                         disabled={hasChecked}
                         dir="ltr"
-                        className={`p-3 rounded-2xl font-en font-semibold text-center border transition-all ${
+                        className={`p-3 rounded-2xl font-en font-semibold text-center border transition-colors select-none touch-manipulation ${
                           selectedBlank === opt
                             ? 'bg-indigo-600 text-white border-indigo-600 shadow-md'
                             : 'bg-white text-slate-700 border-slate-200 hover:border-indigo-300'
@@ -350,7 +384,8 @@ export const ExerciseModal: React.FC<ExerciseModalProps> = ({
               {/* FEEDBACK SECTION UPON CHECKING */}
               {hasChecked && (
                 <div
-                  className={`mt-4 p-4 rounded-2xl border transition-all animate-fade-in ${
+                  ref={feedbackRef}
+                  className={`mt-4 p-4 rounded-2xl border animate-fade-in shrink-0 ${
                     isCorrect
                       ? 'bg-emerald-50/90 border-emerald-200 text-emerald-900'
                       : 'bg-rose-50/90 border-rose-200 text-rose-900'
@@ -367,21 +402,6 @@ export const ExerciseModal: React.FC<ExerciseModalProps> = ({
                         <span className="font-bold text-sm">
                           {isCorrect ? 'آفرین، کاملاً درسته! 🎉' : 'نیاز به مرور دارد'}
                         </span>
-                        {/* Audio pronunciation button */}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (currentExercise.type === 'word_order') {
-                              playPronunciation((currentExercise as WordOrderExerciseItem).correctSentence);
-                            } else if (currentExercise.sentenceWithBlank) {
-                              playPronunciation(currentExercise.sentenceWithBlank.replace('___', ''));
-                            }
-                          }}
-                          className="text-xs flex items-center gap-1 underline opacity-80 hover:opacity-100"
-                        >
-                          <Volume2 className="w-3.5 h-3.5" />
-                          <span>تلفظ صوتی</span>
-                        </button>
                       </div>
                       <p className="text-xs mt-1 leading-relaxed">{currentExercise.explanation}</p>
                     </div>
@@ -413,7 +433,7 @@ export const ExerciseModal: React.FC<ExerciseModalProps> = ({
 
         {/* Bottom Actions Bar */}
         {!isFinished && (
-          <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+          <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between shrink-0">
             <span className="text-xs text-slate-500">
               {hasChecked ? 'برای سوال بعدی ادامه را بزنید' : 'پاسخ خود را انتخاب و بررسی کنید'}
             </span>

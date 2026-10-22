@@ -1,6 +1,5 @@
 import React from 'react';
 import { UserProgress } from '../../types';
-import { playPronunciation } from '../../utils/speech';
 import {
   RotateCcw,
   CheckCircle2,
@@ -8,14 +7,15 @@ import {
   Flame,
   Award,
   Trash2,
-  Volume2,
   BookOpen,
   Sparkles,
-  Settings
+  Settings,
+  Compass
 } from 'lucide-react';
 
 interface ReviewMistakesViewProps {
   progress: UserProgress;
+  onNavigateTab: (tab: 'tenses' | 'lessons' | 'review') => void;
   onClearMistakes: () => void;
   onRemoveMistake: (id: string) => void;
   onResetProgress: () => void;
@@ -24,6 +24,7 @@ interface ReviewMistakesViewProps {
 
 export const ReviewMistakesView: React.FC<ReviewMistakesViewProps> = ({
   progress,
+  onNavigateTab,
   onClearMistakes,
   onRemoveMistake,
   onResetProgress,
@@ -44,6 +45,54 @@ export const ReviewMistakesView: React.FC<ReviewMistakesViewProps> = ({
         <p className="text-xs sm:text-sm text-slate-300 mt-1 leading-relaxed">
           اشتباه کردن بهترین فرصت یادگیری است! هر سوالی که اشتباه پاسخ داده‌ای اینجا ذخیره می‌شود تا مرور کنی.
         </p>
+      </div>
+
+      {/* سه کارت میان‌بر (منتقل‌شده از خانه) */}
+      <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
+        <button
+          type="button"
+          onClick={() => onNavigateTab('tenses')}
+          className="bg-white p-3 sm:p-4 rounded-3xl border border-indigo-50 shadow-xs flex flex-col items-center text-center hover:border-indigo-200 hover:shadow-md transition-all active:scale-95"
+        >
+          <div className="w-9 h-9 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center mb-2">
+            <Compass className="w-5 h-5 stroke-[2.2]" />
+          </div>
+          <span className="text-[11px] font-semibold text-slate-500">نقشه زمان‌ها</span>
+          <span className="text-base sm:text-lg font-extrabold text-slate-800 mt-0.5">
+            <span className="font-en">{progress.completedTenses.length}</span> / <span className="font-en">12</span>
+          </span>
+          <span className="text-[10px] text-sky-600 mt-0.5">زمان کامل</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onNavigateTab('lessons')}
+          className="bg-white p-3 sm:p-4 rounded-3xl border border-indigo-50 shadow-xs flex flex-col items-center text-center hover:border-indigo-200 hover:shadow-md transition-all active:scale-95"
+        >
+          <div className="w-9 h-9 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mb-2">
+            <BookOpen className="w-5 h-5 stroke-[2.2]" />
+          </div>
+          <span className="text-[11px] font-semibold text-slate-500">درس‌های پاس‌شده</span>
+          <span className="text-base sm:text-lg font-extrabold text-slate-800 mt-0.5">
+            <span className="font-en">{progress.completedLessons.length}</span> درس
+          </span>
+          <span className="text-[10px] text-amber-600 mt-0.5">گام به گام</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onNavigateTab('review')}
+          className="bg-white p-3 sm:p-4 rounded-3xl border border-indigo-50 shadow-xs flex flex-col items-center text-center hover:border-indigo-200 hover:shadow-md transition-all active:scale-95"
+        >
+          <div className="w-9 h-9 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-2">
+            <Flame className="w-5 h-5 stroke-[2.2]" />
+          </div>
+          <span className="text-[11px] font-semibold text-slate-500">زنجیره تمرین</span>
+          <span className="text-base sm:text-lg font-extrabold text-slate-800 mt-0.5">
+            <span className="font-en">{progress.streakDays}</span> روز
+          </span>
+          <span className="text-[10px] text-emerald-600 mt-0.5">پشتکار عالی</span>
+        </button>
       </div>
 
       {/* STATS OVERVIEW CARDS */}

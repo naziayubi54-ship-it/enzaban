@@ -1,13 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { UserProgress } from '../../types';
 import { MascotAvatar } from '../MascotAvatar';
+import { TenseMindMap } from '../TenseMindMap';
 import {
   Compass,
   BookOpen,
   RotateCw,
   Sparkles,
   ArrowLeft,
-  Flame,
+  Network,
   CheckCircle2,
   Clock,
   Layers,
@@ -25,6 +26,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
   onNavigateTab,
   onOpenLesson,
 }) => {
+  const [mindMapOpen, setMindMapOpen] = useState(false);
   const percentComplete = Math.min(
     100,
     Math.round((progress.todayCompletedCount / progress.dailyGoal) * 100)
@@ -32,56 +34,22 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
   return (
     <div className="flex flex-col gap-5 pb-24 px-4 max-w-2xl mx-auto animate-fade-in">
-      {/* 3 Metrics Cards (Matching Water, Sleep, Exercise in Screenshot 1) */}
-      <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
-        {/* Metric 1: Tenses */}
-        <button
-          type="button"
-          onClick={() => onNavigateTab('tenses')}
-          className="bg-white p-3 sm:p-4 rounded-3xl border border-indigo-50 shadow-xs flex flex-col items-center text-center hover:border-indigo-200 hover:shadow-md transition-all active:scale-95"
-        >
-          <div className="w-9 h-9 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center mb-2">
-            <Compass className="w-5 h-5 stroke-[2.2]" />
-          </div>
-          <span className="text-[11px] font-semibold text-slate-500">نقشه زمان‌ها</span>
-          <span className="text-base sm:text-lg font-extrabold text-slate-800 mt-0.5">
-            <span className="font-en">{progress.completedTenses.length}</span> / <span className="font-en">12</span>
-          </span>
-          <span className="text-[10px] text-sky-600 mt-0.5">زمان کامل</span>
-        </button>
-
-        {/* Metric 2: Lessons */}
-        <button
-          type="button"
-          onClick={() => onNavigateTab('lessons')}
-          className="bg-white p-3 sm:p-4 rounded-3xl border border-indigo-50 shadow-xs flex flex-col items-center text-center hover:border-indigo-200 hover:shadow-md transition-all active:scale-95"
-        >
-          <div className="w-9 h-9 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mb-2">
-            <BookOpen className="w-5 h-5 stroke-[2.2]" />
-          </div>
-          <span className="text-[11px] font-semibold text-slate-500">درس‌های پاس‌شده</span>
-          <span className="text-base sm:text-lg font-extrabold text-slate-800 mt-0.5">
-            <span className="font-en">{progress.completedLessons.length}</span> درس
-          </span>
-          <span className="text-[10px] text-amber-600 mt-0.5">گام به گام</span>
-        </button>
-
-        {/* Metric 3: Exercises / Streak */}
-        <button
-          type="button"
-          onClick={() => onNavigateTab('review')}
-          className="bg-white p-3 sm:p-4 rounded-3xl border border-indigo-50 shadow-xs flex flex-col items-center text-center hover:border-indigo-200 hover:shadow-md transition-all active:scale-95"
-        >
-          <div className="w-9 h-9 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-2">
-            <Flame className="w-5 h-5 stroke-[2.2]" />
-          </div>
-          <span className="text-[11px] font-semibold text-slate-500">زنجیره تمرین</span>
-          <span className="text-base sm:text-lg font-extrabold text-slate-800 mt-0.5">
-            <span className="font-en">{progress.streakDays}</span> روز
-          </span>
-          <span className="text-[10px] text-emerald-600 mt-0.5">پشتکار عالی</span>
-        </button>
-      </div>
+      {/* کارت نقشه ذهنی لینگوپلاس */}
+      <button
+        type="button"
+        onClick={() => setMindMapOpen(true)}
+        className="w-full relative overflow-hidden rounded-3xl bg-white border border-indigo-100 shadow-xs hover:shadow-md hover:border-indigo-300 p-4 flex items-center gap-3.5 text-right active:scale-[0.99] transition-all"
+      >
+        <span className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-indigo-500/25">
+          <Network className="w-6 h-6" />
+        </span>
+        <span className="flex-1 min-w-0">
+          <span className="block text-base font-black text-slate-800">نقشه ذهنی لینگوپلاس</span>
+          <span className="block text-xs text-slate-500 mt-0.5">۱۲ زمان انگلیسی را یک‌جا و شاخه‌به‌شاخه ببین</span>
+        </span>
+        <ArrowLeft className="w-4 h-4 text-indigo-500 shrink-0" />
+      </button>
+      <TenseMindMap open={mindMapOpen} onClose={() => setMindMapOpen(false)} completedTenses={progress.completedTenses} />
 
       {/* TODAY'S PROGRESS HERO CARD (Matching Dark Purple Card in Screenshot 1) */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#4338CA] via-[#4F46E5] to-[#7C3AED] text-white p-5 sm:p-6 shadow-xl shadow-indigo-500/20">
@@ -128,7 +96,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
           {/* Cute mascot illustration in corner (like in Screenshot 1) */}
           <div className="shrink-0 flex flex-col items-center">
             <MascotAvatar type="bear" size="lg" />
-            <span className="text-[11px] font-bold text-amber-300 mt-1">خرس دانا</span>
+            <span className="text-[11px] font-bold text-amber-300 mt-1">لینگو</span>
           </div>
         </div>
       </div>

@@ -73,3 +73,19 @@ export const tenseUsages: Record<string, TenseUsage[]> = {
     { whenFa: 'وقتی می‌خواهیم طول کشیدن یک کار تا آینده را تاکید کنیم', en: 'At 6, she will have been studying for 4 hours.', fa: 'ساعت ۶، چهار ساعت است که دارد درس می‌خواند.' },
   ],
 };
+
+// فرمول خیلی ساده ساخت جمله (مثبت) برای هر زمان؛ بدون جزئیات
+export const simpleFormulas: Record<string, string> = {
+  'present-simple': 'Subject + V1 + بقیه جمله',
+  'present-continuous': 'Subject + am/is/are + V-ing',
+  'present-perfect': 'Subject + have/has + V3',
+  'present-perfect-continuous': 'Subject + have/has + been + V-ing',
+  'past-simple': 'Subject + V2 + بقیه جمله',
+  'past-continuous': 'Subject + was/were + V-ing',
+  'past-perfect': 'Subject + had + V3',
+  'past-perfect-continuous': 'Subject + had + been + V-ing',
+  'future-simple': 'Subject + will + V1',
+  'future-continuous': 'Subject + will + be + V-ing',
+  'future-perfect': 'Subject + will + have + V3',
+  'future-perfect-continuous': 'Subject + will + have + been + V-ing',
+};
